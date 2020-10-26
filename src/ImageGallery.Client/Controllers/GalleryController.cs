@@ -1,5 +1,8 @@
 ﻿using ImageGallery.Client.ViewModels;
 using ImageGallery.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,9 +11,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace ImageGallery.Client.Controllers
 { 
+    [Authorize]
     public class GalleryController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -23,6 +30,8 @@ namespace ImageGallery.Client.Controllers
 
         public async Task<IActionResult> Index()
         {
+            await WriteOutIdentityInformation();
+
             var httpClient = _httpClientFactory.CreateClient("APIClient");
 
             var request = new HttpRequestMessage(
@@ -171,6 +180,28 @@ namespace ImageGallery.Client.Controllers
             response.EnsureSuccessStatusCode();
 
             return RedirectToAction("Index");
+        }
+
+        public async Task Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
+        public async Task WriteOutIdentityInformation()
+        {
+            // get the saved identity token
+            var identityToken = await HttpContext
+                .GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+
+            // write it out
+            Debug.WriteLine($"Identity token: {identityToken}");
+
+            // write out the user claims
+            foreach (var claim in User.Claims)
+            {
+                Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
+            }
         }
     }
 }
