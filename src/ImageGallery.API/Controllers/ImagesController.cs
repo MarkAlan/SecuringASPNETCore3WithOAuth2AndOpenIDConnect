@@ -20,6 +20,7 @@ namespace ImageGallery.API.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IMapper _mapper;
 
+        //added some comments to check if branch is correct
         public ImagesController(
             IGalleryRepository galleryRepository,
             IWebHostEnvironment hostingEnvironment,
