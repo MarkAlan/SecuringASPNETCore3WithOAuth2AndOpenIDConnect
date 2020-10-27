@@ -20,6 +20,7 @@ namespace ImageGallery.API
     {
         public IConfiguration Configuration { get; }
 
+        //I added some comments for this repo
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
